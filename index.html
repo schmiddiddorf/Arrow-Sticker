@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Arrowsocks Sticker WebApp</title>
+<link rel="manifest" href="manifest.json">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{font-family:Arial;margin:0;}
+#ui{padding:10px;}
+.tabs{display:flex;gap:6px;background:#eee;padding:6px;position:sticky;top:0;z-index:10;}
+.tab{padding:6px 10px;border:1px solid #ccc;cursor:pointer;}
+.tab.active{background:white;font-weight:bold;}
+.panel{display:none;padding:10px;}
+#previewWrap{background:#666;padding:10px;}
+#preview{background:white;width:45mm;height:50mm;}
+.row{display:flex;align-items:center;gap:8px;margin:6px 0;flex-wrap:wrap;}
+label{min-width:160px;}
+input[type=range]{min-width:200px;}
+.inline-group{display:flex;gap:12px;align-items:center;}
+.install-hint{background:#eef;padding:8px;margin:6px 0;border:1px solid #99c;}
+</style>
+</head>
+
+<body>
+
+<div id="previewWrap">
+<svg id="preview" viewBox="0 0 45 50"></svg>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="allgemein">Allgemein</div>
+  <div class="tab" data-tab="icon">Icon</div>
+  <div class="tab" data-tab="schrift">Schrift</div>
+  <div class="tab" data-tab="export">Export</div>
+</div>
+
+<div id="ui">
+
+<div class="install-hint">
+<b>Web-App Installation:</b><br>
+• Windows (Chrome/Edge): Menü → „Installieren“<br>
+• Android (Samsung Internet/Chrome): Menü → „Zum Startbildschirm hinzufügen“
+</div>
+
+<!-- ALLGEMEIN -->
+<div id="allgemein" class="panel" style="display:block;">
+  <div class="row"><label>Name</label><input id="name" value="NORD"></div>
+  <div class="row">
+    <label>Anzahl Namen</label>
+    <select id="count">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3" selected>3</option>
+    </select>
+  </div>
+  <div class="row">
+    <label>Sticker Breite</label>
+    <input id="stickerW" type="range" min="10" max="45" step="0.5" value="45">
+    <span id="stickerWVal">45 mm</span>
+  </div>
+  <div class="row">
+    <label>Pfeildurchmesser</label>
+    <input id="arrowDia" type="range" min="0" max="12" step="0.01" value="5">
+    <span id="arrowDiaVal">5.00 mm</span>
+  </div>
+  <div class="row">
+    <label>Zusatzhöhe</label>
+    <input id="extraH" type="range" min="0.1" max="2.0" step="0.1" value="0.1">
+    <span id="extraHVal">0.1 mm</span>
+  </div>
+</div>
+
+<!-- ICON -->
+<div id="icon" class="panel">
+  <div class="row"><label>Icon anzeigen</label><input id="iconOn" type="checkbox" checked></div>
+  <div class="row">
+    <label>Icon Position</label>
+    <div class="inline-group">
+      <label><input type="radio" name="iconSide" value="left" checked> links</label>
+      <label><input type="radio" name="iconSide" value="right"> rechts</label>
+    </div>
+  </div>
+  <div class="row">
+    <label>Emoji Flagge</label>
+    <select id="emoji">
+      <option value="🇩🇪">🇩🇪 Deutschland</option>
+      <option value="🇫🇷">🇫🇷 Frankreich</option>
+      <option value="🇬🇧">🇬🇧 UK</option>
+      <option value="🇺🇸">🇺🇸 USA</option>
+      <option value="🏁">🏁 Finish</option>
+      <option value="⭐">⭐ Stern</option>
+    </select>
+  </div>
+  <div class="row">
+    <label>Icon Höhe</label>
+    <input id="iconSize" type="range" min="1" max="15" step="0.1" value="3">
+    <span id="iconSizeVal">3.0 mm</span>
+  </div>
+  <div class="row">
+    <label>Icon Vertikal-Offset</label>
+    <input id="iconVOffset" type="range" min="-0.5" max="0.5" step="0.1" value="0">
+    <span id="iconVOffsetVal">0.0 mm</span>
+  </div>
+</div>
+
+<div id="schrift" class="panel"></div>
+<div id="export" class="panel"></div>
+</div>
+
+<script>
+const preview = document.getElementById('preview');
+const name = document.getElementById('name');
+const count = document.getElementById('count');
+const stickerW = document.getElementById('stickerW');
+const stickerWVal = document.getElementById('stickerWVal');
+const arrowDia = document.getElementById('arrowDia');
+const arrowDiaVal = document.getElementById('arrowDiaVal');
+const extraH = document.getElementById('extraH');
+const extraHVal = document.getElementById('extraHVal');
+
+const iconOn = document.getElementById('iconOn');
+const emoji = document.getElementById('emoji');
+const iconSize = document.getElementById('iconSize');
+const iconSizeVal = document.getElementById('iconSizeVal');
+const iconVOffset = document.getElementById('iconVOffset');
+const iconVOffsetVal = document.getElementById('iconVOffsetVal');
+
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.style.display='none');
+    t.classList.add('active');
+    document.getElementById(t.dataset.tab).style.display='block';
+  });
+});
+
+function mm(v){ return parseFloat(v); }
+
+function update(){
+  stickerWVal.textContent = stickerW.value + " mm";
+  arrowDiaVal.textContent = parseFloat(arrowDia.value).toFixed(2) + " mm";
+  extraHVal.textContent = extraH.value + " mm";
+  iconSizeVal.textContent = iconSize.value + " mm";
+  iconVOffsetVal.textContent = iconVOffset.value + " mm";
+
+  const n = name.value || "NORD";
+  const c = parseInt(count.value);
+  const w = mm(stickerW.value);
+  const h = mm(arrowDia.value) * Math.PI + mm(extraH.value);
+
+  let svg = `<rect x="0" y="0" width="${w}" height="${h}" fill="white"/>`;
+
+  const positions = c===1 ? [h*0.5] :
+                    c===2 ? [h*0.25, h*0.75] :
+                             [h*0.167, h*0.5, h*0.833];
+
+  const side = document.querySelector('input[name="iconSide"]:checked').value;
+
+  positions.forEach(y=>{
+    const textX = 8;
+    const fSize = 3; 
+
+    let iconX = textX - mm(iconSize.value) - 1;
+    let textPos = textX;
+    if(side === 'right'){
+      iconX = w - 6;
+      textPos = 8;
+    }
+
+    if(iconOn.checked){
+      svg += `<text x="${iconX}" y="${y + mm(iconVOffset.value)}"
+                 font-size="${mm(iconSize.value)}"
+                 dominant-baseline="middle">${emoji.value}</text>`;
+    }
+
+    svg += `<text x="${textPos}" y="${y}" font-size="${fSize}"
+                dominant-baseline="middle">${n}</text>`;
+  });
+
+  preview.setAttribute("viewBox", `0 0 ${w} ${h}`);
+  preview.innerHTML = svg;
+}
+
+[name,count,stickerW,arrowDia,extraH,iconOn,emoji,iconSize,iconVOffset]
+ .forEach(el=>el.addEventListener('input',update));
+
+document.querySelectorAll('input[name="iconSide"]').forEach(r=>r.addEventListener('change',update));
+
+update();
+</script>
+</body>
+</html>
