@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Arrow-Sticker</title>
+<link rel="manifest" href="manifest.json">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{font-family:Arial;margin:0;height:100vh;display:flex;flex-direction:column;}
+
+/* Vorschau oben fix */
+#previewWrap{
+  background:#666;
+  padding:10px;
+  flex:0 0 50mm;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+#preview{
+  background:transparent;
+  width:45mm;
+  height:50mm;
+}
+
+/* UI unten scrollbar */
+#ui{
+  flex:1 1 auto;
+  overflow-y:auto;
+  padding:10px;
+}
+
+.tabs{
+  display:flex;
+  gap:6px;
+  background:#eee;
+  padding:6px;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+.tab{
+  padding:6px 10px;
+  border:1px solid #ccc;
+  cursor:pointer;
+}
+.tab.active{
+  background:white;
+  font-weight:bold;
+}
+.panel{display:none;padding:10px;}
+
+.row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:6px 0;
+  flex-wrap:wrap;
+}
+label{min-width:160px;}
+input[type=range]{min-width:200px;}
+.inline-group{display:flex;gap:12px;align-items:center;}
+hr{margin:12px 0;}
+.note{font-size:0.85em;color:#555;}
+
+/* --- Neue kompakte Rahmen-Checkbox-Zeile --- */
+.frame-inline{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-left:5px; /* deine 5px */
+}
+.frame-inline label{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:4px;
+  cursor:pointer;
+}
+.frame-icon{
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div id="previewWrap">
+  <svg id="preview" viewBox="0 0 45 50"></svg>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="allgemein">Allgemein</div>
+  <div class="tab" data-tab="icon">Icon</div>
+  <div class="tab" data-tab="nummer">Nummer</div>
+  <div class="tab" data-tab="schrift">Schrift</div>
+  <div class="tab" data-tab="export">Export</div>
+</div>
+
+<div id="ui">
+
+<!-- ALLGEMEIN -->
+<div id="allgemein" class="panel" style="display:block;">
+
+  <div class="row"><label>Name</label><input id="name" value="NORD"></div>
+
+  <div class="row">
+    <label>Anzahl Namen</label>
+    <select id="count">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3" selected>3</option>
+    </select>
+  </div>
+
+  <hr>
+
+  <div class="row">
+    <label>Sticker Breite</label>
+    <input id="stickerW" type="range" min="10" max="45" step="0.5" value="45">
+    <span id="stickerWVal">45 mm</span>
+  </div>
+
+  <div class="row">
+    <label>Pfeildurchmesser</label>
+    <input id="arrowDia" type="range" min="0" max="12" step="0.01" value="5">
+    <span id="arrowDiaVal">5.00 mm</span>
+  </div>
+
+  <div class="row">
+    <label>Zusatzhöhe</label>
+    <input id="extraH" type="range" min="0.1" max="2.0" step="0.1" value="0.1">
+    <span id="extraHVal">0.1 mm</span>
+  </div>
+
+  <hr>
+
+  <div class="row">
+    <label>Hintergrundfarbe</label>
+    <input id="bgColor" type="color" value="#ffffff">
+  </div>
+
+  <!-- Neue kompakte O U L R Zeile -->
+  <div class="row">
+    <label>Rahmen</label>
+    <div class="frame-inline">
+      <label><span class="frame-icon">⎺</span><input type="checkbox" id="frameTop"></label>
+      <label><span class="frame-icon">⎻</span><input type="checkbox" id="frameBottom"></label>
+      <label><span class="frame-icon">⎸</span><input type="checkbox" id="frameLeft"></label>
+      <label><span class="frame-icon">⎹</span><input type="checkbox" id="frameRight"></label>
+    </div>
+  </div>
+
+  <div class="row">
+    <label>Rahmenfarbe</label>
+    <input id="frameColor" type="color" value="#000000">
+  </div>
+
+  <div class="row">
+    <label>Rahmenbreite</label>
+    <input id="frameWidth" type="range" min="0.05" max="10.0" step="0.05" value="0.2">
+    <span id="frameWidthVal">0.20 mm</span>
+  </div>
+
+</div>
+
+<!-- ICON -->
+<div id="icon" class="panel">
+  <div class="row"><label>Icon anzeigen</label><input id="iconOn" type="checkbox" checked></div>
+
+  <div class="row">
+    <label>Icon Position</label>
+    <div class="inline-group">
+      <label><input type="radio" name="iconSide" value="left" checked> links</label>
+      <label><input type="radio" name="iconSide" value="right"> rechts</label>
+    </div>
+  </div>
+
+  <div class="row">
+    <label>Emoji Flagge</label>
+    <select id="emoji">
+      <option value="🇩🇪">🇩🇪 Deutschland</option>
+      <option value="🇫🇷">🇫🇷 Frankreich</option>
+      <option value="🇬🇧">🇬🇧 UK</option>
+      <option value="🇺🇸">🇺🇸 USA</option>
+      <option value="🏁">🏁 Finish</option>
+      <option value="⭐">⭐ Stern</option>
+    </select>
+  </div>
+
+  <div class="row">
+    <label>Icon Höhe</label>
+    <input id="iconSize" type="range" min="1" max="15" step="0.1" value="3">
+    <span id="iconSizeVal">3.0 mm</span>
+  </div>
+
+  <div class="row">
+    <label>Icon Vertikal-Offset</label>
+    <input id="iconVOffset" type="range" min="-0.5" max="0.5" step="0.1" value="0">
+    <span id="iconVOffsetVal">0.0 mm</span>
+  </div>
+</div>
+
+<!-- NUMMER / KREIS -->
+<div id="nummer" class="panel">
+  <div class="row"><label>Kreis anzeigen</label><input id="circleOn" type="checkbox" checked></div>
+
+  <div class="row">
+    <label>Kreis Position</label>
+    <div class="inline-group">
+      <label><input type="radio" name="circleSide" value="right" checked> rechts vom Namen</label>
+      <label><input type="radio" name="circleSide" value="left"> links vom Namen</label>
+    </div>
+  </div>
+
+  <div class="row">
+    <label>Form</label>
+    <select id="circleShape">
+      <option value="circle" selected>Kreis</option>
+      <option value="capsule">Langloch</option>
+    </select>
+  </div>
+
+  <div class="row">
+    <label>Kreishöhe</label>
+    <input id="circleDia" type="range" min="2" max="10" step="0.1" value="3">
+    <span id="circleDiaVal">3.00 mm</span>
+  </div>
+
+  <div class="row">
+    <label>Langloch Breite</label>
+    <input id="capsuleW" type="range" min="3" max="20" step="0.5" value="8">
+    <span id="capsuleWVal">8.0 mm</span>
+    <span class="note">(nur aktiv bei Langloch)</span>
+  </div>
+
+  <div class="row"><label>Füllfarbe</label><input id="circleFill" type="color" value="#ffffff"></div>
+  <div class="row"><label>Rahmenfarbe</label><input id="circleStroke" type="color" value="#000000"></div>
+
+  <div class="row">
+    <label>Rahmenbreite</label>
+    <input id="circleStrokeWidth" type="range" min="0.05" max="1.0" step="0.05" value="0.2">
+    <span id="circleStrokeVal">0.20 mm</span>
+  </div>
+
+  <div class="row">
+    <label>Abstand Name→Kreis</label>
+    <input id="circleGap" type="range" min="2" max="20" step="0.5" value="8">
+    <span id="circleGapVal">8.0 mm</span>
+  </div>
+
+  <div class="row">
+    <label>Kreis Vertikal-Offset</label>
+    <input id="circleVOffset" type="range" min="-0.5" max="0.5" step="0.1" value="0">
+    <span id="circleVOffsetVal">0.0 mm</span>
+  </div>
+
+  <div class="row">
+    <label>Nummerierung</label>
+    <select id="numMode">
+      <option value="none" selected>keine</option>
+      <option value="1-12">1–12</option>
+      <option value="2x1-6">2× 1–6</option>
+    </select>
+  </div>
+</div>
+
+<div id="schrift" class="panel"></div>
+<div id="export" class="panel"></div>
+
+</div>
+
+<script>
+const preview = document.getElementById('preview');
+const name = document.getElementById('name');
+const count = document.getElementById('count');
+const stickerW = document.getElementById('stickerW');
+const stickerWVal = document.getElementById('stickerWVal');
+const arrowDia = document.getElementById('arrowDia');
+const arrowDiaVal = document.getElementById('arrowDiaVal');
+const extraH = document.getElementById('extraH');
+const extraHVal = document.getElementById('extraHVal');
+
+const bgColor = document.getElementById('bgColor');
+const frameTop = document.getElementById('frameTop');
+const frameBottom = document.getElementById('frameBottom');
+const frameLeft = document.getElementById('frameLeft');
+const frameRight = document.getElementById('frameRight');
+const frameColor = document.getElementById('frameColor');
+const frameWidth = document.getElementById('frameWidth');
+const frameWidthVal = document.getElementById('frameWidthVal');
+
+const iconOn = document.getElementById('iconOn');
+const emoji = document.getElementById('emoji');
+const iconSize = document.getElementById('iconSize');
+const iconSizeVal = document.getElementById('iconSizeVal');
+const iconVOffset = document.getElementById('iconVOffset');
+const iconVOffsetVal = document.getElementById('iconVOffsetVal');
+
+const circleOn = document.getElementById('circleOn');
+const circleShape = document.getElementById('circleShape');
+const circleDia = document.getElementById('circleDia');
+const circleDiaVal = document.getElementById('circleDiaVal');
+const capsuleW = document.getElementById('capsuleW');
+const capsuleWVal = document.getElementById('capsuleWVal');
+const circleFill = document.getElementById('circleFill');
+const circleStroke = document.getElementById('circleStroke');
+const circleStrokeWidth = document.getElementById('circleStrokeWidth');
+const circleStrokeVal = document.getElementById('circleStrokeVal');
+const circleGap = document.getElementById('circleGap');
+const circleGapVal = document.getElementById('circleGapVal');
+const circleVOffset = document.getElementById('circleVOffset');
+const circleVOffsetVal = document.getElementById('circleVOffsetVal');
+const numMode = document.getElementById('numMode');
+
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.style.display='none');
+    t.classList.add('active');
+    document.getElementById(t.dataset.tab).style.display='block';
+  });
+});
+
+function mm(v){ return parseFloat(v); }
+
+function estimateTextWidth(txt, fontSize){
+  return txt.length * fontSize * 0.6;
+}
+
+function update(){
+  stickerWVal.textContent = stickerW.value + " mm";
+  arrowDiaVal.textContent = parseFloat(arrowDia.value).toFixed(2) + " mm";
+  extraHVal.textContent = extraH.value + " mm";
+  iconSizeVal.textContent = iconSize.value + " mm";
+  iconVOffsetVal.textContent = iconVOffset.value + " mm";
+  circleDiaVal.textContent = parseFloat(circleDia.value).toFixed(2) + " mm";
+  capsuleWVal.textContent = capsuleW.value + " mm";
+  circleStrokeVal.textContent = parseFloat(circleStrokeWidth.value).toFixed(2) + " mm";
+  circleGapVal.textContent = circleGap.value + " mm";
+  circleVOffsetVal.textContent = circleVOffset.value + " mm";
+  frameWidthVal.textContent = parseFloat(frameWidth.value).toFixed(2) + " mm";
+
+  const n = name.value || "NORD";
+  const c = parseInt(count.value);
+  const w = mm(stickerW.value);
+  const h = mm(arrowDia.value) * Math.PI + mm(extraH.value);
+
+  let svg = `<rect x="0" y="0" width="${w}" height="${h}" fill="${bgColor.value}"/>`;
+
+  const fw = mm(frameWidth.value);
+
+  if(frameTop.checked){
+    svg += `<line x1="0" y1="${fw/2}" x2="${w}" y2="${fw/2}" stroke="${frameColor.value}" stroke-width="${fw}"/>`;
+  }
+  if(frameBottom.checked){
+    svg += `<line x1="0" y1="${h-fw/2}" x2="${w}" y2="${h-fw/2}" stroke="${frameColor.value}" stroke-width="${fw}"/>`;
+  }
+  if(frameLeft.checked){
+    svg += `<line x1="${fw/2}" y1="0" x2="${fw/2}" y2="${h}" stroke="${frameColor.value}" stroke-width="${fw}"/>`;
+  }
+  if(frameRight.checked){
+    svg += `<line x1="${w-fw/2}" y1="0" x2="${w-fw/2}" y2="${h}" stroke="${frameColor.value}" stroke-width="${fw}"/>`;
+  }
+
+  const positions = c===1 ? [h*0.5] :
+                    c===2 ? [h*0.25, h*0.75] :
+                             [h*0.167, h*0.5, h*0.833];
+
+  const iconSide = document.querySelector('input[name="iconSide"]:checked').value;
+  const circleSide = document.querySelector('input[name="circleSide"]:checked').value;
+
+  positions.forEach((y,i)=>{
+    const textX = 8;
+    const fSize = 3;
+
+    let iconX = textX - mm(iconSize.value) - 1;
+    if(iconSide === 'right'){
+      iconX = w - mm(iconSize.value) - 4;
+    }
+    if(iconOn.checked){
+      svg += `<text x="${iconX}" y="${y + mm(iconVOffset.value)}"
+                 font-size="${mm(iconSize.value)}"
+                 dominant-baseline="middle">${emoji.value}</text>`;
+    }
+
+    svg += `<text x="${textX}" y="${y}" font-size="${fSize}"
+                dominant-baseline="middle">${n}</text>`;
+
+    if(circleOn.checked){
+      const d = mm(circleDia.value);
+      const r = d/2;
+      const gap = mm(circleGap.value);
+      const cy = y + mm(circleVOffset.value);
+      const textWidth = estimateTextWidth(n, fSize);
+
+      let cx;
+      if(circleSide === 'right'){
+        cx = textX + textWidth + gap + r;
+      } else {
+        cx = textX - gap - r;
+      }
+
+      if(circleShape.value === 'circle'){
+        svg += `<circle cx="${cx}" cy="${cy}" r="${r}"
+                  fill="${circleFill.value}"
+                  stroke="${circleStroke.value}"
+                  stroke-width="${circleStrokeWidth.value}"/>`;
+      } else {
+        const capW = mm(capsuleW.value);
+        svg += `<rect x="${cx-capW/2}" y="${cy-r}"
+                  width="${capW}" height="${d}"
+                  rx="${r}" ry="${r}"
+                  fill="${circleFill.value}"
+                  stroke="${circleStroke.value}"
+                  stroke-width="${circleStrokeWidth.value}"/>`;
+      }
+
+      let numText = '';
+      if(numMode.value === '1-12') numText = String(i+1);
+      if(numMode.value === '2x1-6') numText = String((i%6)+1);
+
+      if(numText!==''){
+        svg += `<text x="${cx}" y="${cy}"
+                 text-anchor="middle"
+                 dominant-baseline="middle"
+                 font-size="${Math.max(1, fSize-1)}"
+                 font-weight="bold">${numText}</text>`;
+      }
+    }
+  });
+
+  preview.setAttribute("viewBox", `0 0 ${w} ${h}`);
+  preview.innerHTML = svg;
+}
+
+[ name,count,stickerW,arrowDia,extraH,bgColor,frameTop,frameBottom,frameLeft,frameRight,frameColor,frameWidth,
+  iconOn,emoji,iconSize,iconVOffset,
+  circleOn,circleShape,circleDia,capsuleW,circleFill,circleStroke,circleStrokeWidth,
+  circleGap,circleVOffset,numMode ]
+  .forEach(el=>el.addEventListener('input',update));
+
+document.querySelectorAll('input[name="iconSide"]').forEach(r=>r.addEventListener('change',update));
+document.querySelectorAll('input[name="circleSide"]').forEach(r=>r.addEventListener('change',update));
+
+update();
+</script>
+</body>
+</html>
