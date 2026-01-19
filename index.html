@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Arrow-Sticker WebApp</title>
+<title>Arrowsocks Sticker WebApp V2</title>
 <link rel="manifest" href="manifest.json">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
@@ -71,7 +71,7 @@ input[type=range]{min-width:200px;}
   </div>
 </div>
 
-<!-- ICON -->
+<!-- ICON + KREIS (V2) -->
 <div id="icon" class="panel">
   <div class="row"><label>Icon anzeigen</label><input id="iconOn" type="checkbox" checked></div>
   <div class="row">
@@ -102,6 +102,47 @@ input[type=range]{min-width:200px;}
     <input id="iconVOffset" type="range" min="-0.5" max="0.5" step="0.1" value="0">
     <span id="iconVOffsetVal">0.0 mm</span>
   </div>
+
+  <hr style="margin:12px 0;">
+
+  <div class="row"><label>Kreis anzeigen</label><input id="circleOn" type="checkbox" checked></div>
+  <div class="row">
+    <label>Form</label>
+    <select id="circleShape">
+      <option value="circle" selected>Kreis</option>
+      <option value="capsule">Langloch</option>
+    </select>
+  </div>
+  <div class="row">
+    <label>Kreisdurchmesser</label>
+    <input id="circleDia" type="range" min="2" max="10" step="0.1" value="3">
+    <span id="circleDiaVal">3.00 mm</span>
+  </div>
+  <div class="row"><label>Füllfarbe</label><input id="circleFill" type="color" value="#ffffff"></div>
+  <div class="row"><label>Rahmenfarbe</label><input id="circleStroke" type="color" value="#000000"></div>
+  <div class="row">
+    <label>Rahmenbreite</label>
+    <input id="circleStrokeWidth" type="range" min="0.05" max="1.0" step="0.05" value="0.2">
+    <span id="circleStrokeVal">0.20 mm</span>
+  </div>
+  <div class="row">
+    <label>Abstand Name → Kreis</label>
+    <input id="circleGap" type="range" min="1" max="20" step="0.5" value="6">
+    <span id="circleGapVal">6 mm</span>
+  </div>
+  <div class="row">
+    <label>Kreis Vertikal-Offset</label>
+    <input id="circleVOffset" type="range" min="-0.5" max="0.5" step="0.1" value="0">
+    <span id="circleVOffsetVal">0.0 mm</span>
+  </div>
+  <div class="row">
+    <label>Nummerierung</label>
+    <select id="numMode">
+      <option value="none" selected>keine</option>
+      <option value="1-12">1–12</option>
+      <option value="2x1-6">2× 1–6</option>
+    </select>
+  </div>
 </div>
 
 <div id="schrift" class="panel"></div>
@@ -126,6 +167,20 @@ const iconSizeVal = document.getElementById('iconSizeVal');
 const iconVOffset = document.getElementById('iconVOffset');
 const iconVOffsetVal = document.getElementById('iconVOffsetVal');
 
+const circleOn = document.getElementById('circleOn');
+const circleShape = document.getElementById('circleShape');
+const circleDia = document.getElementById('circleDia');
+const circleDiaVal = document.getElementById('circleDiaVal');
+const circleFill = document.getElementById('circleFill');
+const circleStroke = document.getElementById('circleStroke');
+const circleStrokeWidth = document.getElementById('circleStrokeWidth');
+const circleStrokeVal = document.getElementById('circleStrokeVal');
+const circleGap = document.getElementById('circleGap');
+const circleGapVal = document.getElementById('circleGapVal');
+const circleVOffset = document.getElementById('circleVOffset');
+const circleVOffsetVal = document.getElementById('circleVOffsetVal');
+const numMode = document.getElementById('numMode');
+
 document.querySelectorAll('.tab').forEach(t=>{
   t.addEventListener('click',()=>{
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
@@ -137,12 +192,32 @@ document.querySelectorAll('.tab').forEach(t=>{
 
 function mm(v){ return parseFloat(v); }
 
+function drawCircle(svg, x, y, d, shape, fill, stroke, sw, num, fSize){
+  const r = d/2;
+  if(shape==='circle'){
+    svg += `<circle cx="${x}" cy="${y}" r="${r}"
+      fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`;
+  } else {
+    svg += `<rect x="${x-r}" y="${y-r}" width="${d}" height="${d}"
+      rx="${r}" ry="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`;
+  }
+  if(num!==''){
+    svg += `<text x="${x}" y="${y}" text-anchor="middle"
+      dominant-baseline="middle" font-size="${Math.max(1,fSize-1)}"
+      font-weight="bold">${num}</text>`;
+  }
+}
+
 function update(){
   stickerWVal.textContent = stickerW.value + " mm";
   arrowDiaVal.textContent = parseFloat(arrowDia.value).toFixed(2) + " mm";
   extraHVal.textContent = extraH.value + " mm";
   iconSizeVal.textContent = iconSize.value + " mm";
   iconVOffsetVal.textContent = iconVOffset.value + " mm";
+  circleDiaVal.textContent = parseFloat(circleDia.value).toFixed(2) + " mm";
+  circleStrokeVal.textContent = parseFloat(circleStrokeWidth.value).toFixed(2) + " mm";
+  circleGapVal.textContent = circleGap.value + " mm";
+  circleVOffsetVal.textContent = circleVOffset.value + " mm";
 
   const n = name.value || "NORD";
   const c = parseInt(count.value);
@@ -157,7 +232,7 @@ function update(){
 
   const side = document.querySelector('input[name="iconSide"]:checked').value;
 
-  positions.forEach(y=>{
+  positions.forEach((y,i)=>{
     const textX = 8;
     const fSize = 3; 
 
@@ -176,13 +251,29 @@ function update(){
 
     svg += `<text x="${textPos}" y="${y}" font-size="${fSize}"
                 dominant-baseline="middle">${n}</text>`;
+
+    if(circleOn.checked){
+      const d = mm(circleDia.value);
+      const gap = mm(circleGap.value);
+      const cx = textPos + gap + 2;
+      let numText = '';
+      if(numMode.value==='1-12') numText = String(i+1);
+      if(numMode.value==='2x1-6') numText = String((i%6)+1);
+
+      drawCircle(svg, cx, y + mm(circleVOffset.value), d,
+                 circleShape.value, circleFill.value,
+                 circleStroke.value, circleStrokeWidth.value,
+                 numText, fSize);
+    }
   });
 
   preview.setAttribute("viewBox", `0 0 ${w} ${h}`);
   preview.innerHTML = svg;
 }
 
-[name,count,stickerW,arrowDia,extraH,iconOn,emoji,iconSize,iconVOffset]
+[name,count,stickerW,arrowDia,extraH,iconOn,emoji,iconSize,iconVOffset,
+ circleOn,circleShape,circleDia,circleFill,circleStroke,circleStrokeWidth,
+ circleGap,circleVOffset,numMode]
  .forEach(el=>el.addEventListener('input',update));
 
 document.querySelectorAll('input[name="iconSide"]').forEach(r=>r.addEventListener('change',update));
