@@ -1,13 +1,13 @@
 {
-  "name": "Arrow-Sticker Generator",
-  "short_name": "StickerGen",
+  "name": "Arrow-Sticker",
+  "short_name": "Arrow-Sticker",
   "display": "standalone",
   "background_color": "#666666",
   "theme_color": "#ffffff",
   "start_url": "./index.html",
   "icons": [
     {
-      "src": "https://via.placeholder.com/192",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     }
